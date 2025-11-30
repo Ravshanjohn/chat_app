@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import Warning from "../components/Warning";
 
 import AuthImagePattern from "../components/AuthImagePattern";
+import Warning from "../components/Warning";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
@@ -36,6 +38,7 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
+      <Warning />
       {/* left side */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
