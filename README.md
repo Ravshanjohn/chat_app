@@ -29,7 +29,7 @@ cd chat_app
 Install dependencies:
 
 ```bash
-npm install
+npm run build
 ```
 
 ### Running the App
@@ -37,7 +37,7 @@ npm install
 Start the development server:
 
 ```bash
-npm start
+npm run start
 ```
 
 Open your browser and visit [http://localhost:3000](http://localhost:3000) to use the chat app.
