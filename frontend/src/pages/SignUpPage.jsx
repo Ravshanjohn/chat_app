@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import PasswordStrengthMeter, { getStrengthText } from "../components/PasswordStrengthMeter";
+
 
 import AuthImagePattern from "../components/AuthImagePattern";
-import Warning from "../components/Warning";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
@@ -14,7 +15,6 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
-
   const { signup, isSigningUp } = useAuthStore();
 
   const validateForm = () => {
@@ -33,11 +33,13 @@ const SignUpPage = () => {
     const success = validateForm();
 
     if (success === true) signup(formData);
+
+
   };
 
+  
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      <Warning />
       {/* left side */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
@@ -97,19 +99,21 @@ const SignUpPage = () => {
                 <span className="label-text font-medium">Password</span>
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-base-content/40" />
-                </div>
+                {/* Left Lock Icon */}
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-base-content/40" />
+
                 <input
                   type={showPassword ? "text" : "password"}
-                  className={`input input-bordered w-full pl-10`}
+                  className="input input-bordered w-full pl-10 pr-10"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+
+                {/* Right Eye Toggle */}
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -118,11 +122,13 @@ const SignUpPage = () => {
                     <Eye className="size-5 text-base-content/40" />
                   )}
                 </button>
+
               </div>
+              <PasswordStrengthMeter password={formData.password} />
             </div>
 
             <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
-              {isSigningUp ? (
+              {isSigningUp && strength !== "Weak" && strength !== "Very Weak" ? (
                 <>
                   <Loader2 className="size-5 animate-spin" />
                   Loading...

@@ -3,7 +3,6 @@ import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
-import Warning from "../components/Warning";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +19,6 @@ const LoginPage = () => {
 
   return (
     <div className="h-screen grid lg:grid-cols-2">
-      <Warning />
       {/* Left Side - Form */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
@@ -85,13 +83,16 @@ const LoginPage = () => {
                   )}
                 </button>
               </div>
+              <Link to='/forgot-password' className='text-sm text-red-400 hover:underline mt-3'>
+                Forgot password?
+              </Link>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
+
+            <button type="submit" className="btn btn-primary w-full hover:underline" disabled={isLoggingIn}>
               {isLoggingIn ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Loading...
                 </>
               ) : (
                 "Sign in"
