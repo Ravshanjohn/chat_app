@@ -20,10 +20,54 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lastVerificationEmailSentAt: {
+      type: Date,
+      default: null,
+    },
+
+    verificationAttemptsResetAt: {
+      type: Date,
+      default: null,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordAttempts: {
+      type: Number,
+      default: 0,
+    },
+    resetPasswordAttemptsResetAt: {
+      type: Date,
+      default: null,
+    },
+    resetPasswordExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    lastResetPasswordEmailSentAt: {
+      type: Date,
+      default: null,
+    },
+
+    verificationToken: {
+      type: String,
+      default: null,
+    },
+    verificationTokenExpiresAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
-
-export default User;
+export default mongoose.model("User", userSchema);

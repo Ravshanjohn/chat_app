@@ -36,7 +36,7 @@ const ForgotPasswordPage = () => {
             className="space-y-6"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text">
+              <h2 className="text-3xl font-bold mb-2 ">
                 Forgot Password
               </h2>
               <p className="text-base-content/60">
