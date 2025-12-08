@@ -25,7 +25,7 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="h-screen grid lg:grid-cols-2">
+    <div className="h-screen grid lg:grid-cols-2 overflow-auto">
       {/* Left Side - Form */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
@@ -36,7 +36,7 @@ const ForgotPasswordPage = () => {
             className="space-y-6"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-2 ">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center bg-gradient-to-br from-primary to-secondary text-transparent bg-clip-text">
                 Forgot Password
               </h2>
               <p className="text-base-content/60">
