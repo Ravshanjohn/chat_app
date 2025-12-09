@@ -4,6 +4,7 @@ import {
   forgotPassword,
   login,
   logout,
+  resendResetPasswordEmail,
   resendVerificationEmail,
   resetPassword,
   signup,
@@ -17,9 +18,10 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
-router.post("/verify-email", verifyEmail);
+router.post("/verify-email/:token", verifyEmail);
 router.post("/resend-verification", resendVerificationEmail);
 router.post("/forgot-password", forgotPassword); 
+router.post("/resend-reset-password", resendResetPasswordEmail);
 router.post("/reset-password/:token", resetPassword);
 
 router.put("/update-profile", protectRoute, updateProfile);

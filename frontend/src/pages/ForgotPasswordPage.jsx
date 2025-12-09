@@ -10,7 +10,7 @@ const ForgotPasswordPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
-  const { isLoading, forgotPassword } = useAuthStore();
+  const { isLoading, forgotPassword, resendResetPasswordEmail } = useAuthStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,6 +20,17 @@ const ForgotPasswordPage = () => {
       setIsSubmitted(true);
     } catch (error) {
       const msg = error?.response?.data?.message || error?.message || "Error sending reset link";
+      setSubmitError(msg);
+    }
+  };
+
+  const handleSubmitResend = async (e) => {
+    e.preventDefault();
+    setSubmitError(null); 
+    try {
+      await resendResetPasswordEmail(email);
+    } catch (error) {
+      const msg = error?.response?.data?.message || error?.message || "Error resending reset link";
       setSubmitError(msg);
     }
   };
@@ -101,9 +112,19 @@ const ForgotPasswordPage = () => {
                   <p className="text-base-content/60 text-sm">
                     If an account exists for <span className="font-medium">{email}</span>, you will receive a password reset link shortly.
                   </p>
+
+                  <div className="text-center flex flex-col">
+                    <div>Did not receive the email?</div>
+                    <form onSubmit={handleSubmitResend}>
+                      <button className="p-0 hover:underline hover:text-red-600">Resend</button>
+
+                    </form>
+                  </div>
                 </div>
               </div>
             )}
+
+          
 
             <div className="text-center">
               <Link

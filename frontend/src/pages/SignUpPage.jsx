@@ -1,10 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter, { getStrengthText } from "../components/PasswordStrengthMeter";
-
-
 import AuthImagePattern from "../components/AuthImagePattern";
 import toast from "react-hot-toast";
 
@@ -14,8 +12,29 @@ const SignUpPage = () => {
     fullName: "",
     email: "",
     password: "",
+    isReceived: false,
   });
-  const { signup, isSigningUp } = useAuthStore();
+  const { signup, isSigningUp, isEmailSent } = useAuthStore();
+
+  useEffect(() => {
+    if (isEmailSent) {
+      navigate("/email-verification");
+    }
+  }, [isEmailSent]);
+
+
+
+  // Calculate strength based on current password
+  const getStrength = (pass) => {
+    let strength = 0;
+    if (pass.length >= 6) strength++;
+    if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) strength++;
+    if (pass.match(/\d/)) strength++;
+    if (pass.match(/[^a-zA-Z\d]/)) strength++;
+    return strength;
+  };
+  const strength = getStrength(formData.password);
+  const strengthText = getStrengthText(strength);
 
   const validateForm = () => {
     if (!formData.fullName.trim()) return toast.error("Full name is required");
@@ -27,14 +46,19 @@ const SignUpPage = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const success = validateForm();
 
-    if (success === true) signup(formData);
-
-
+    if (success !== true) return;
+  
+    try {
+      await signup(formData.fullName, formData.email, formData.password);
+    } catch (error) {
+      // Error is already handled by toast in the store
+      console.error("Signup error:", error);
+    }
   };
 
   
@@ -128,7 +152,7 @@ const SignUpPage = () => {
             </div>
 
             <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
-              {isSigningUp && strength !== "Weak" && strength !== "Very Weak" ? (
+              {isSigningUp ? (
                 <>
                   <Loader2 className="size-5 animate-spin" />
                   Loading...

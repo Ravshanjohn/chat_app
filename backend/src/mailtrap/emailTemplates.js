@@ -4,23 +4,23 @@ export const VERIFICATION_EMAIL_TEMPLATE = `
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verify Your Email</title>
+  <title>Reset Your Password</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(to right, #4CAF50, #45a049); padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-    <h1 style="color: white; margin: 0;">Verify Your Email</h1>
+  <div style="background: linear-gradient(to right, #4caf50, #45a049); padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+    <h1 style="color: #fff; margin: 0;">Verify Your Email</h1>
   </div>
   <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
     <p>Hello,</p>
-    <p>Thank you for signing up! Your verification code is:</p>
+    <p>Thank you for signing up! Please verify your email address to complete your registration.</p>
+    <p>Click the button below to confirm your email:</p>
     <div style="text-align: center; margin: 30px 0;">
-      <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4CAF50;">
-        {verificationCode}
-      </span>
+      <a href="{verificationURL}"
+        style="background-color: #4caf50; color: #fff; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+        Verify Email
+      </a>
     </div>
-    <p>Enter this code on the verification page to complete your registration.</p>
-    <p>This code will expire in 24 hours for security reasons.</p>
-    <p>If you didn't create an account, you can safely ignore this email.</p>
+    <p>This link will expire in 8 hours for security reasons.</p>
     <p>Best regards,<br>{senderName}</p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
@@ -36,27 +36,28 @@ export const PASSWORD_RESET_SUCCESS_TEMPLATE = `
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Password Reset Successful</title>
+  <title>Email Updated Successfully</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(to right, #4CAF50, #45a049); padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-    <h1 style="color: #fff; margin: 0;">Password Reset Successful</h1>
+  <div style="background: linear-gradient(to right, #2196F3, #1976D2); padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+    <h1 style="color: #fff; margin: 0;">Email Updated Successfully</h1>
   </div>
   <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
     <p>Hello,</p>
-    <p>Your password has been successfully reset.</p>
+    <p>Your account email has been successfully updated.</p>
     <div style="text-align: center; margin: 30px 0;">
-      <div style="background-color: #4CAF50; color: white; width: 50px; height: 50px; line-height: 50px; border-radius: 50%; display: inline-block; font-size: 28px;">
+      <div style="background-color: #2196F3; color: white; width: 50px; height: 50px; line-height: 50px; border-radius: 50%; display: inline-block; font-size: 28px;">
         ✓
       </div>
     </div>
-    <p>If you did not perform this action, please contact me immediately so I can help secure your account.</p>
+    <p>If you did not make this change, please contact me immediately so I can help secure your account.</p>
     <p>For your security, I recommend:</p>
     <ul>
-      <li>Using a strong, unique password</li>
-      <li>Avoiding the same password across multiple websites</li>
+      <li>Ensuring this email is private and accessible only to you</li>
+      <li>Reviewing your security settings regularly</li>
+      <li>Using strong passwords for your account</li>
     </ul>
-    <p>Thank you for keeping your account secure.</p>
+    <p>Thank you for keeping your account safe.</p>
     <p>Best regards,<br>{senderName}</p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">

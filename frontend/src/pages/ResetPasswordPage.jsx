@@ -17,21 +17,31 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    let passwordTrimmed = password.trim();
+    let confirmPasswordTrimmed = confirmPassword.trim();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
+    console.log("Password:", `"${passwordTrimmed}"`, "Length:", passwordTrimmed.length);
+    console.log("Confirm:", `"${confirmPasswordTrimmed}"`, "Length:", confirmPasswordTrimmed.length);
+    console.log("Match:", passwordTrimmed === confirmPasswordTrimmed);
+
+    if (passwordTrimmed !== confirmPasswordTrimmed) {
+      toast.error("Passwords do not match");
       return;
     }
-    try {
-      await resetPassword(token, password);
 
-      toast.success("Password reset successfully, redirecting to login page...");
+    if (passwordTrimmed.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      await resetPassword(token, passwordTrimmed);
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error) {
       console.error(error);
-      toast.error(error.message || "Error resetting password");
     }
   };
 

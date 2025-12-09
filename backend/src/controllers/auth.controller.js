@@ -19,17 +19,21 @@ export const signup = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email });
+    if(existingUser && !existingUser.isVerified){
+      return res.status(400).json({ success: false, message: "User not verified, please verify your email sent to you." });
+    };
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "Email already exists" });
+      return res.status(400).json({ success: false, message: "Email already registered" });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate verification token
-    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+    
 
-    // **Create user first**
+    // Create user first
     const now = new Date();
     const newUser = new User({
       fullName,
@@ -37,7 +41,7 @@ export const signup = async (req, res) => {
       password: hashedPassword,
       isVerified: false,
       verificationToken,
-      verificationTokenExpiresAt: now.getTime() + 24 * 60 * 60 * 1000,
+      verificationTokenExpiresAt: new Date(now.getTime() + 8 * 60 * 60 * 1000),
       verificationAttempts: 0, // Start at 0, will be incremented when email is sent
       lastVerificationEmailSentAt: null,
       verificationAttemptsResetAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
@@ -45,22 +49,11 @@ export const signup = async (req, res) => {
 
     await newUser.save();
 
-    // **Then send email in the background**
-    sendVerificationEmail(email, verificationToken)
-      .then(async (isSent) => {
-        if (isSent) {
-          console.log(`Verification email sent to ${email}`);
-          // Update user with email sent status
-          newUser.lastVerificationEmailSentAt = new Date();
-          newUser.verificationAttempts = 1;
-          await newUser.save();
-        } else {
-          console.error(`Failed to send verification email to ${email}`);
-        }
-      })
-      .catch((error) => {
-        console.error(`Error in background email sending: ${error.message}`);
-      });
+    
+    const isSent = await sendVerificationEmail(email, verificationToken);
+    if (!isSent) {
+      return res.status(500).json({ success: false, message: "Error sending verification email" });
+    }
 
     // Respond immediately
     return res.status(201).json({
@@ -76,12 +69,12 @@ export const signup = async (req, res) => {
 
 
 export const verifyEmail = async (req, res) => {
-  const { code } = req.body;
+  const { token } = req.params;
   let count = 1;
   try {
     // Find user with valid code
     const user = await User.findOne({
-      verificationToken: code,
+      verificationToken: token,
       verificationTokenExpiresAt: { $gt: new Date() } // not expired
     });
   
@@ -96,6 +89,10 @@ export const verifyEmail = async (req, res) => {
     user.verificationToken = null;
     user.verificationTokenExpiresAt = null;
     await user.save();
+    
+    // Generate JWT token
+    generateToken(user._id, res);
+    
     // Send welcome email
     await sendWelcomeEmail(user.email, user.fullName);
 
@@ -104,6 +101,7 @@ export const verifyEmail = async (req, res) => {
       success: true,
       message: "Email verified successfully",
       user: {
+        _id: user._id,
         fullName: user.fullName,
         email: user.email,
         isVerified: user.isVerified,
@@ -155,7 +153,7 @@ export const resendVerificationEmail = async (req, res) => {
 		};
 
 		// Generate new token and send email
-		const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+		const verificationToken = crypto.randomBytes(20).toString("hex");
 		const isSent = await sendVerificationEmail(email, verificationToken);
 
 		if (!isSent) {
@@ -164,7 +162,7 @@ export const resendVerificationEmail = async (req, res) => {
 
 		// Update user
 		user.verificationToken = verificationToken;
-		user.verificationTokenExpiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+		user.verificationTokenExpiresAt = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 hours
 		user.lastVerificationEmailSentAt = now;
 		user.verificationAttempts += 1;
 
@@ -180,7 +178,7 @@ export const resendVerificationEmail = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email }).select("-password -verificationToken -verificationTokenExpiresAt -isVerified -verificationAttempts -lastVerificationEmailSentAt -verificationAttemptsResetAt -resetPasswordToken -resetPasswordExpiresAt ");
+    const user = await User.findOne({ email }).select("-password -verificationAttempts -lastVerificationEmailSentAt -verificationAttemptsResetAt -resetPasswordToken -resetPasswordAttempts -resetPasswordAttemptsResetAt -resetPasswordExpiresAt -lastResetPasswordEmailSentAt -verificationToken -verificationTokenExpiresAt -__v -updatedAt");
 
     if (!user) {
       return res.status(400).json({ success: false, message: "Invalid credentials" });
@@ -277,10 +275,67 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+export const resendResetPasswordEmail = async (req, res) => {
+  const { email } = req.body;
+  const now = new Date();
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.lastResetPasswordEmailSentAt) {
+      const diffMs = now.getTime() - user.lastResetPasswordEmailSentAt.getTime();
+      if (diffMs < 60 * 1000) {
+        return res.status(429).json({ success: false, message: "Please wait 1 minute before trying again." });
+      }
+    }
+
+    // Reset 24h window if expired
+    if (!user.resetPasswordAttemptsResetAt || user.resetPasswordAttemptsResetAt < now) {
+      user.resetPasswordAttempts = 0;
+      user.resetPasswordAttemptsResetAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    }
+    // Enforce max attempts 2 per 24h    
+    if (user.resetPasswordAttempts >= 2) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many reset attempts. Try again after 24 hours."
+      });
+    }
+    
+    // Generate new token
+    const resetToken = crypto.randomBytes(20).toString("hex");
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    user.resetPasswordAttempts += 1; // increment attempts
+    user.lastResetPasswordEmailSentAt = new Date();
+
+    await user.save();  
+    // Send email
+    const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    await sendPasswordResetEmail(email, resetURL);  
+    return res.status(200).json({ success: true, message: "Password reset email sent successfully." });
+  } catch (error) {
+    console.error("Error in resendResetPasswordEmail:", error.message);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  };
+};
+
 export const resetPassword = async (req, res) => {
   const { token } = req.params;
-  const { newPassword} = req.body;
+  const { password } = req.body;
 
+  if (!password) {
+    return res.status(400).json({ success: false, message: "Password is required" });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+  };
+  
   try {
     const user = await User.findOne({
       resetPasswordToken: token,
@@ -292,12 +347,9 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid or expired token" });
     };
     
-    if (newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
-    };
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.resetPasswordToken = null;
     user.resetPasswordExpiresAt = null;
@@ -333,7 +385,7 @@ export const updateProfile = async (req, res) => {
       { new: true }
     );
 
-    return res.status(200).json({ success: true, user: updatedUser });
+    return res.status(200).json({ success: true, user: updatedUser, message: "Profile updated successfully" });
   } catch (error) {
     console.log("error in update profile:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
@@ -345,7 +397,7 @@ export const checkAuth = (req, res) => {
     const user = req.user.toObject();
 
     const hiddenFields = [
-      "password",
+      "_id",
       "lastVerificationEmailSentAt",
       "verificationAttemptsResetAt",
       "verificationAttempts",
@@ -357,7 +409,6 @@ export const checkAuth = (req, res) => {
       "verificationTokenExpiresAt",
       "lastResetPasswordEmailSentAt",
       "__v",
-      "createdAt",
       "updatedAt"
     ];
 

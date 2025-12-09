@@ -11,7 +11,7 @@ export const sendVerificationEmail = async (email, verificatioToken) => {
       html: VERIFICATION_EMAIL_TEMPLATE.replace("{verificationCode}", verificatioToken).replace(
         "{senderName}",
         sender.name
-      ),
+      ).replace("{verificationURL}", `${process.env.CLIENT_URL}/email-verification/${verificatioToken}`),
       category: "Email Verification",
     });
     return true;
@@ -64,7 +64,7 @@ export const sendResetSuccessEmail = async (email) => {
       from: sender,
       to: recipient,
       subject: "Password Reset Successful",
-      html: PASSWORD_RESET_SUCCESS_TEMPLATE,
+      html: PASSWORD_RESET_SUCCESS_TEMPLATE.replace("{senderName}", sender.name),
       category: "Password Reset Successfull"
     });
   } catch (error) {
