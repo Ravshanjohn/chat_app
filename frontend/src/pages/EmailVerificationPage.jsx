@@ -12,6 +12,7 @@ const EmailVerificationPage = () => {
   const attemptedRef = useRef(false);
 
   useEffect(() => {
+    if (!token) return; // If no token, just show the UI
     if (attemptedRef.current) return; // prevent duplicate runs (StrictMode)
     attemptedRef.current = true;
 
@@ -43,7 +44,7 @@ const EmailVerificationPage = () => {
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-base-content">Verify Your Email</h2>
           <p className="text-base-content/70">
-            Please check your email for a verification link. You will be redirected shortly.
+            {token ? "Verifying your email..." : "Please check your email for a verification link."}
           </p>
         </div>
       </motion.div>
