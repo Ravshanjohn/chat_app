@@ -11,8 +11,8 @@ if (!process.env.MAILTRAP_TOKEN) {
 }
 
 export const sender = {
-  email: "hello@ravshan.site",
-  name: "Ravshan",
+  email: process.env.SENDER,
+  name: process.env.SENDER,
 };
 
 
