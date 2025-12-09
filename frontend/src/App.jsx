@@ -48,7 +48,7 @@ const App = () => {
             isLoggedIn ? (
               <Navigate to="/" />
             ) : isEmailSent ? (
-              <Navigate to="/email-verification" />
+              <Navigate to="/email-verification/:token" />
             ) : (
               <SignUpPage />
             )
