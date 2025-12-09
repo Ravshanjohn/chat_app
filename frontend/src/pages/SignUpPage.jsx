@@ -18,7 +18,7 @@ const SignUpPage = () => {
 
   useEffect(() => {
     if (isEmailSent) {
-      navigate("/email-verification/:token");
+      navigate("/email-verification");
     }
   }, [isEmailSent]);
 

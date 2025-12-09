@@ -48,7 +48,7 @@ const App = () => {
             isLoggedIn ? (
               <Navigate to="/" />
             ) : isEmailSent ? (
-              <Navigate to="/email-verification/:token" />
+              <Navigate to="/email-verification" />
             ) : (
               <SignUpPage />
             )
@@ -69,6 +69,7 @@ const App = () => {
 
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+        <Route path="/email-verification" element={<EmailVerificationPage />} />
         <Route
           path="/email-verification/:token"
           element={<EmailVerificationPage />}
